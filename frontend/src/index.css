@@ -1,0 +1,530 @@
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Exo+2:wght@300;400;500&display=swap");
+
+/* ── Variables ─────────────────────────────────────────── */
+:root {
+  --bg-deep: #0b0f1f;
+  --bg-mid: #141933;
+  --bg-panel: rgba(255, 255, 255, 0.035);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.18);
+  --gold: #c8a84b;
+  --gold-light: #e8c96a;
+  --text-primary: #e8e4d8;
+  --text-muted: #7a8099;
+  --accent-glow: rgba(200, 168, 75, 0.15);
+}
+
+/* ── Reset & Base ───────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-deep);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, #1e2d5a 0%, transparent 70%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.015'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  font-family: "Exo 2", sans-serif;
+  font-weight: 300;
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* ── Header / App Title ─────────────────────────────────── */
+.app_title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-content: center;
+  padding: 22px 0 20px;
+  font-family: "Cinzel", serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(200, 168, 75, 0.4);
+  border-bottom: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  text-decoration: none;
+}
+
+.app_title img {
+  width: 46px;
+  height: 46px;
+  filter: drop-shadow(0 0 10px rgba(200, 168, 75, 0.5));
+}
+
+/* ── Guild List ─────────────────────────────────────────── */
+.guild-list-wrapper {
+  max-width: 860px;
+  margin: 48px auto;
+  padding: 0 16px;
+}
+
+.guild-list-wrapper h1 {
+  font-family: "Cinzel", serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.guild-list-wrapper h1 span {
+  color: var(--gold);
+}
+
+/* ── Buscador ───────────────────────────────────────────── */
+.search-wrapper {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input-row:focus-within {
+  border-color: rgba(200, 168, 75, 0.45);
+  box-shadow: 0 0 0 3px rgba(200, 168, 75, 0.08);
+}
+
+.search-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 12px 0;
+  font-family: "Exo 2", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--text-primary);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-clear {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 4px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.search-clear:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Dropdown de resultados ─────────────────────────────── */
+.search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: #141933;
+  border: 1px solid rgba(200, 168, 75, 0.25);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(200, 168, 75, 0.05);
+  animation: searchDrop 0.15s ease;
+}
+
+@keyframes searchDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-result-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s ease;
+}
+
+.search-result-card:last-child {
+  border-bottom: none;
+}
+
+.search-result-card:hover {
+  background: rgba(200, 168, 75, 0.07);
+}
+
+.search-result-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  /* color set inline desde classColors */
+}
+
+.search-result-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.search-result-dot {
+  opacity: 0.4;
+}
+
+.search-result-class {
+  font-weight: 500;
+}
+
+.search-result-realm {
+  text-transform: capitalize;
+}
+
+.search-result-level {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+/* ── Sin resultados ─────────────────────────────────────── */
+.search-results--empty {
+  padding: 16px;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.search-results--empty strong {
+  color: var(--text-primary);
+}
+
+/* ── Table ──────────────────────────────────────────────── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.guild-table {
+  width: 100%;
+}
+
+thead {
+  background: linear-gradient(
+    180deg,
+    rgba(200, 168, 75, 0.08),
+    rgba(0, 0, 0, 0.2)
+  );
+}
+
+th {
+  padding: 14px 16px;
+  text-align: left;
+  font-family: "Cinzel", serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(200, 168, 75, 0.2);
+}
+
+td {
+  padding: 11px 16px;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s ease;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr {
+  transition: background 0.15s ease;
+}
+
+tbody tr:hover {
+  background: rgba(200, 168, 75, 0.05);
+}
+
+tbody tr:hover td {
+  border-bottom-color: rgba(200, 168, 75, 0.12);
+}
+
+/* ── Character Link ─────────────────────────────────────── */
+.character-link {
+  text-decoration: none;
+  color: inherit;
+  font-weight: 500;
+  transition:
+    filter 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.character-link:hover {
+  filter: brightness(1.25);
+  opacity: 0.9;
+}
+
+/* ── Character Page ─────────────────────────────────────── */
+.character-page {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 2rem;
+  max-width: 1100px;
+  margin: 48px auto;
+  padding: 0 16px;
+}
+
+.character-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  padding: 40px 32px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.character-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.5;
+}
+
+.character-card h1 {
+  font-family: "Cinzel", serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--gold-light);
+  text-shadow: 0 0 20px rgba(200, 168, 75, 0.3);
+  letter-spacing: 0.04em;
+}
+
+.character-image {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  object-position: center 60%;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow:
+    0 0 40px rgba(0, 0, 0, 0.6),
+    0 0 80px rgba(200, 168, 75, 0.08);
+}
+
+.character-stats {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.character-level,
+.character-ilvl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(200, 168, 75, 0.08);
+  border: 1px solid rgba(200, 168, 75, 0.25);
+  border-radius: 999px;
+  padding: 5px 18px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+
+/* ── Loading state ──────────────────────────────────────── */
+h2 {
+  text-align: center;
+  margin-top: 80px;
+  font-family: "Cinzel", serif;
+  font-weight: 400;
+  font-size: 1rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ── Achievements ───────────────────────────────────────── */
+.activity-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activity-section h2 {
+  font-family: "Cinzel", serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  animation: none;
+  margin-top: 0;
+}
+
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.activity-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.achievement-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.activity-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(200, 168, 75, 0.1);
+}
+
+.activity-icon--mplus {
+  font-family: "Cinzel", serif;
+}
+
+.activity-card:hover {
+  transform: translateX(4px);
+  border-color: var(--gold);
+}
+
+.activity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.activity-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--gold-light);
+}
+
+.activity-description {
+  font-size: 0.86rem;
+  color: var(--text-primary);
+}
+
+.activity-date {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .character-page {
+    flex-direction: column;
+    margin: 24px 12px;
+  }
+
+  .character-card {
+    padding: 24px 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .app_title {
+    font-size: 1.2rem;
+    color: inherit;
+  }
+
+  th,
+  td {
+    padding: 10px 10px;
+    font-size: 0.8rem;
+  }
+}
