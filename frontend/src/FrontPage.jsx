@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
-// Realms WoW US/LATAM pre-guardados (slug -> nombre display)
 const WOW_REALMS = [
   { slug: "quelthalas",        name: "Quel'Thalas" },
   { slug: "ragnaros",          name: "Ragnaros" },
@@ -40,7 +39,6 @@ function FrontPage() {
   const wrapperRef  = useRef(null);
   const debounceRef = useRef(null);
 
-  // Cierra dropdown al hacer click afuera
   useEffect(() => {
     function handleClickOutside(e) {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
@@ -51,7 +49,6 @@ function FrontPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Busca sugerencias en el backend con debounce
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -79,20 +76,24 @@ function FrontPage() {
     }, 300);
   }, [query, mode]);
 
+  function toSlug(name) {
+    return name.toLowerCase().replace(/\s+/g, "-");
+  }
+
   function handleSelect(result) {
     setFocused(false);
     setQuery("");
     setSuggestions([]);
     setShowRealm(false);
     if (mode === "character") {
-      navigate(`/character/${result.realm}/${result.name.toLowerCase()}`);
+      navigate(`/character/${result.realm}/${toSlug(result.name)}`);
     } else {
-      navigate(`/guild/${result.realm}/${result.name.toLowerCase()}`);
+      navigate(`/guild/${result.realm}/${toSlug(result.name)}`);
     }
   }
 
   function handleRealmSelect(realmSlug) {
-    const cleanName = query.trim().toLowerCase();
+    const cleanName = toSlug(query.trim());
     if (!cleanName) {
       setError("Escribe un nombre primero.");
       return;
@@ -134,12 +135,14 @@ function FrontPage() {
 
         <div className="frontpage-toggle">
           <button
+            type="button"
             className={`toggle-btn ${mode === "character" ? "active" : ""}`}
             onClick={() => handleModeChange("character")}
           >
             Personaje
           </button>
           <button
+            type="button"
             className={`toggle-btn ${mode === "guild" ? "active" : ""}`}
             onClick={() => handleModeChange("guild")}
           >
@@ -165,6 +168,7 @@ function FrontPage() {
             />
             {query && (
               <button
+                type="button"
                 className="search-clear"
                 onClick={() => {
                   setQuery("");
@@ -190,6 +194,7 @@ function FrontPage() {
               {!loadingSugg && suggestions.length > 0 &&
                 suggestions.map((result, i) => (
                   <button
+                    type="button"
                     key={`${result.realm}-${result.name}-${i}`}
                     className="search-result-card"
                     onClick={() => handleSelect(result)}
@@ -235,6 +240,7 @@ function FrontPage() {
                   <div className="search-realm-list">
                     {filteredRealms.map((realm) => (
                       <button
+                        type="button"
                         key={realm.slug}
                         className="search-result-card"
                         onClick={() => handleRealmSelect(realm.slug)}

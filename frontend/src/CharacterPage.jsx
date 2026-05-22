@@ -49,6 +49,13 @@ function CharacterPage() {
     raceNames[character.raceId]?.name ||
     `Race ${character.raceId ?? "N/A"}`;
 
+  // Formatear el slug del realm para mostrarlo legible (quelthalas → Quel'Thalas no es posible
+  // sin un mapa, pero al menos capitalizamos cada palabra)
+  const realmDisplay = (character.realmSlug || cleanRealm)
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+
   return (
     <div className="character-page">
       <div className="activity-section">
@@ -111,10 +118,9 @@ function CharacterPage() {
 
       <div className="character-card">
         <h1>{character.name}</h1>
-        <p>
-          {className} {raceName}
-        </p>
-        <p>{character.guild}</p>
+        <p>{className} {raceName}</p>
+        {character.guild && <p>{character.guild}</p>}
+        <p className="character-realm">{realmDisplay}</p>
         <img
           src={character.media.main}
           className="character-image"

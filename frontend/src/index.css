@@ -62,6 +62,143 @@ body {
   filter: drop-shadow(0 0 10px rgba(200, 168, 75, 0.5));
 }
 
+/* ── Front Page ─────────────────────────────────────────── */
+.frontpage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 90px);
+  padding: 0 16px;
+}
+
+.frontpage-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 540px;
+}
+
+.frontpage-title {
+  font-family: "Cinzel", serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--gold-light);
+  text-shadow: 0 0 40px rgba(200, 168, 75, 0.35);
+  text-align: center;
+  /* override the global h2 animation */
+  animation: none;
+  margin-top: 0;
+}
+
+.frontpage-subtitle {
+  font-family: "Exo 2", sans-serif;
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+/* ── Mode toggle ────────────────────────────────────────── */
+.frontpage-toggle {
+  display: flex;
+  gap: 0;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.toggle-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 9px 28px;
+  font-family: "Exo 2", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease;
+}
+
+.toggle-btn:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.toggle-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.toggle-btn.active {
+  color: var(--gold);
+  background: rgba(200, 168, 75, 0.1);
+  font-weight: 500;
+}
+
+/* ── FrontPage search width ─────────────────────────────── */
+.frontpage-search {
+  width: 100%;
+}
+
+/* ── FrontPage error ────────────────────────────────────── */
+.frontpage-error {
+  font-size: 0.82rem;
+  color: #e06c6c;
+  letter-spacing: 0.02em;
+  text-align: center;
+  margin-top: -0.25rem;
+}
+
+/* ── Realm fallback panel ───────────────────────────────── */
+.search-realm-fallback {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.search-realm-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.search-realm-filter {
+  width: 100%;
+  padding: 8px 12px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 7px !important;
+  font-size: 0.85rem !important;
+}
+
+.search-realm-list {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(200, 168, 75, 0.25) transparent;
+}
+
+.search-realm-list .search-result-card {
+  border-radius: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.search-realm-list .search-result-card:last-child {
+  border-bottom: none;
+}
+
 /* ── Guild List ─────────────────────────────────────────── */
 .guild-list-wrapper {
   max-width: 860px;
@@ -182,6 +319,15 @@ body {
   text-decoration: none;
   border-bottom: 1px solid var(--border);
   transition: background 0.12s ease;
+  /* reset button styles */
+  width: 100%;
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
 }
 
 .search-result-card:last-child {
@@ -196,7 +342,6 @@ body {
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  /* color set inline desde classColors */
 }
 
 .search-result-meta {
@@ -356,6 +501,14 @@ tbody tr:hover td {
   letter-spacing: 0.04em;
 }
 
+.character-realm {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .character-image {
   width: 100%;
   height: 280px;
@@ -513,6 +666,10 @@ h2 {
 
   .character-card {
     padding: 24px 16px;
+  }
+
+  .frontpage-title {
+    font-size: 2rem;
   }
 }
 

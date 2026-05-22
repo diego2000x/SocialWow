@@ -20,20 +20,25 @@ app.listen(3000, () => {
 });
 
 let cachedToken = null;
-let tokenExpiresAt = 0; // Timestamp en ms
+let tokenExpiresAt = 0;
 
-// Caché de personajes en memoria
 const characterCache = {};
-const CHARACTER_CACHE_TTL = 10 * 60 * 1000; // 10 minutos en ms
+const CHARACTER_CACHE_TTL = 10 * 60 * 1000;
 
-// Caché de guilds y búsquedas
 const guildCache = {};
 const searchCache = {};
-const SEARCH_CACHE_TTL = 5 * 60 * 1000; // 5 minutos en ms
+const SEARCH_CACHE_TTL = 5 * 60 * 1000;
 
-// Ruta del archivo de logros local
-const achievementsFilePath = path.join(__dirname, "data", "achievements_es.json");
-const mplusNameMapFilePath = path.join(__dirname, "data", "mplus_dungeon_name_map.json");
+const achievementsFilePath = path.join(
+  __dirname,
+  "data",
+  "achievements_es.json",
+);
+const mplusNameMapFilePath = path.join(
+  __dirname,
+  "data",
+  "mplus_dungeon_name_map.json",
+);
 let achievementsLocal = {};
 const mythicDungeonMediaCache = {};
 let mythicDungeonNameMapCache = null;
@@ -46,6 +51,22 @@ let warmupState = {
   finishedAt: null,
   lastResult: null,
   lastError: null,
+};
+
+const CLASS_NAMES = {
+  1: "Warrior",
+  2: "Paladin",
+  3: "Hunter",
+  4: "Rogue",
+  5: "Priest",
+  6: "Death Knight",
+  7: "Shaman",
+  8: "Mage",
+  9: "Warlock",
+  10: "Monk",
+  11: "Druid",
+  12: "Demon Hunter",
+  13: "Evoker",
 };
 
 function normalizeText(value) {
@@ -165,7 +186,6 @@ async function getDungeonIcon(token, run) {
   }
 
   try {
-    // map_challenge_mode describe mejor la run concreta de M+.
     if (run.mapChallengeModeId) {
       const mapMediaRes = await axios.get(
         `https://us.api.blizzard.com/data/wow/media/map/${run.mapChallengeModeId}`,
@@ -181,8 +201,10 @@ async function getDungeonIcon(token, run) {
       );
 
       const mapIcon =
-        mapMediaRes.data?.assets?.find((asset) => asset.key === "tile")?.value ||
-        mapMediaRes.data?.assets?.find((asset) => asset.key === "icon")?.value ||
+        mapMediaRes.data?.assets?.find((asset) => asset.key === "tile")
+          ?.value ||
+        mapMediaRes.data?.assets?.find((asset) => asset.key === "icon")
+          ?.value ||
         mapMediaRes.data?.assets?.[0]?.value ||
         null;
 
@@ -272,24 +294,30 @@ async function getMythicDungeonNameMap(token) {
   }
 
   const [enRes, esRes] = await Promise.all([
-    axios.get("https://us.api.blizzard.com/data/wow/mythic-keystone/dungeon/index", {
-      headers: {
-        Authorization: `Bearer ${token}`,
+    axios.get(
+      "https://us.api.blizzard.com/data/wow/mythic-keystone/dungeon/index",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          namespace: "dynamic-us",
+          locale: "en_US",
+        },
       },
-      params: {
-        namespace: "dynamic-us",
-        locale: "en_US",
+    ),
+    axios.get(
+      "https://us.api.blizzard.com/data/wow/mythic-keystone/dungeon/index",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          namespace: "dynamic-us",
+          locale: "es_MX",
+        },
       },
-    }),
-    axios.get("https://us.api.blizzard.com/data/wow/mythic-keystone/dungeon/index", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      params: {
-        namespace: "dynamic-us",
-        locale: "es_MX",
-      },
-    }),
+    ),
   ]);
 
   const esById = {};
@@ -318,8 +346,14 @@ async function warmGuildAchievementCache(token, options = {}) {
   const maxMembers = options.maxMembers || 80;
   const recentPerCharacter = options.recentPerCharacter || 40;
   const onlyKeystoneHeroes = options.onlyKeystoneHeroes !== false;
-  const scanConcurrency = Math.max(1, Math.min(options.scanConcurrency || 8, 20));
-  const cacheConcurrency = Math.max(1, Math.min(options.cacheConcurrency || 10, 25));
+  const scanConcurrency = Math.max(
+    1,
+    Math.min(options.scanConcurrency || 8, 20),
+  );
+  const cacheConcurrency = Math.max(
+    1,
+    Math.min(options.cacheConcurrency || 10, 25),
+  );
   const startedAt = Date.now();
 
   const rosterRes = await axios.get(
@@ -393,7 +427,10 @@ async function warmGuildAchievementCache(token, options = {}) {
     try {
       const achievementData = await fetchAndCacheAchievementById(token, id);
 
-      if (onlyKeystoneHeroes && !isKeystoneDungeonHeroAchievementName(achievementData.name)) {
+      if (
+        onlyKeystoneHeroes &&
+        !isKeystoneDungeonHeroAchievementName(achievementData.name)
+      ) {
         return;
       }
 
@@ -431,14 +468,17 @@ async function warmGuildAchievementCache(token, options = {}) {
   };
 }
 
-// Cargar logros locales al inicio
 try {
   if (fs.existsSync(achievementsFilePath)) {
     const fileData = fs.readFileSync(achievementsFilePath, "utf8");
     achievementsLocal = JSON.parse(fileData);
-    console.log(`Logros cargados desde el caché local: ${Object.keys(achievementsLocal).length}`);
+    console.log(
+      `Logros cargados desde el caché local: ${Object.keys(achievementsLocal).length}`,
+    );
   } else {
-    console.log("No se encontró archivo de caché local de logros. Se creará uno nuevo.");
+    console.log(
+      "No se encontró archivo de caché local de logros. Se creará uno nuevo.",
+    );
   }
 } catch (error) {
   console.error("Error al cargar logros locales:", error);
@@ -449,9 +489,14 @@ try {
     const fileData = fs.readFileSync(mplusNameMapFilePath, "utf8");
     const rawMap = JSON.parse(fileData);
     manualDungeonNameMap = Object.fromEntries(
-      Object.entries(rawMap).map(([enName, esName]) => [normalizeText(enName), esName]),
+      Object.entries(rawMap).map(([enName, esName]) => [
+        normalizeText(enName),
+        esName,
+      ]),
     );
-    console.log(`Mapa manual de calabozos M+ cargado: ${Object.keys(manualDungeonNameMap).length}`);
+    console.log(
+      `Mapa manual de calabozos M+ cargado: ${Object.keys(manualDungeonNameMap).length}`,
+    );
   } else {
     console.log("No se encontró mapa manual de calabozos M+.");
   }
@@ -461,7 +506,6 @@ try {
 
 async function getAccessToken() {
   const now = Date.now();
-  // Si el token ya existe y le queda al menos 1 minuto de validez, lo reutilizamos
   if (cachedToken && now < tokenExpiresAt - 60000) {
     console.log("Reutilizando token de Blizzard en caché");
     return cachedToken;
@@ -481,11 +525,10 @@ async function getAccessToken() {
       },
     },
   );
-  
+
   cachedToken = response.data.access_token;
-  // expires_in viene en segundos (usualmente 86399 o similar)
   tokenExpiresAt = Date.now() + response.data.expires_in * 1000;
-  
+
   return cachedToken;
 }
 
@@ -509,13 +552,36 @@ app.get("/guild/:realm/:guildName", async (req, res) => {
       },
     );
 
-    // Guardar en guildCache para el buscador
     const gk = `${cleanRealm}_${cleanGuild}`;
     guildCache[gk] = {
       name: response.data.guild?.name ?? guildName,
       realm: cleanRealm,
       memberCount: response.data.members?.length ?? 0,
     };
+
+    // Poblar characterCache con todos los miembros del roster
+    (response.data.members || []).forEach((member) => {
+      const char = member.character;
+      if (!char) return;
+      const realmSlug = char.realm?.slug ?? cleanRealm;
+      const charName = char.name?.toLowerCase() ?? "";
+      if (!charName) return;
+      const ck = `${realmSlug}_${charName}`;
+      // Solo insertar si no existe ya un caché más completo
+      if (!characterCache[ck]) {
+        const classId = char.playable_class?.id ?? null;
+        characterCache[ck] = {
+          data: {
+            name: char.name,
+            realmSlug: realmSlug,
+            level: char.level ?? null,
+            classId: classId,
+            className: CLASS_NAMES[classId] ?? null,
+          },
+          cachedAt: Date.now(),
+        };
+      }
+    });
 
     res.json(response.data);
   } catch (error) {
@@ -528,23 +594,45 @@ app.get("/guild/:realm/:guildName", async (req, res) => {
 });
 
 app.get("/search", async (req, res) => {
-  const q    = (req.query.q || "").toLowerCase().trim();
+  const q = (req.query.q || "").toLowerCase().trim();
   const mode = req.query.mode === "guild" ? "guild" : "character";
 
   if (!q || q.length < 2) {
     return res.json({ results: [] });
   }
 
-  const cacheKey = `${mode}:${q}`;
+  // Buscar siempre en el caché local primero — incluye personajes de
+  // todas las guilds visitadas, independientemente de cuándo se visitaron.
+  const localResults =
+    mode === "character"
+      ? Object.values(characterCache)
+          .filter((e) => e.data?.name?.toLowerCase().includes(q))
+          .map((e) => ({
+            name: e.data.name,
+            realm: e.data.realmSlug ?? "",
+            level: e.data.level ?? null,
+            classId: e.data.classId ?? null,
+            className: e.data.className ?? null,
+          }))
+          .sort((a, b) => (b.level ?? 0) - (a.level ?? 0))
+          .slice(0, 8)
+      : Object.values(guildCache)
+          .filter((g) => g.name.toLowerCase().includes(q))
+          .map((g) => ({ name: g.name, realm: g.realm }))
+          .slice(0, 8);
 
-  // Devolver caché si sigue vigente
-  if (searchCache[cacheKey] && Date.now() - searchCache[cacheKey].cachedAt < SEARCH_CACHE_TTL) {
-    return res.json({ results: searchCache[cacheKey].results, fromCache: true });
+  const blizzCacheKey = `blizz_${mode}:${q}`;
+  const blizzCached = searchCache[blizzCacheKey];
+
+  // Si Blizzard ya está cacheado, fusionar y devolver sin llamar a la API.
+  if (blizzCached && Date.now() - blizzCached.cachedAt < SEARCH_CACHE_TTL) {
+    const merged = mergeResults(mode, blizzCached.results, localResults);
+    return res.json({ results: merged, fromCache: true });
   }
 
   try {
     const token = await getAccessToken();
-    let results = [];
+    let blizzResults = [];
 
     if (mode === "character") {
       const searchRes = await axios.get(
@@ -557,18 +645,18 @@ app.get("/search", async (req, res) => {
             orderby: "level",
             _pageSize: 10,
           },
-        }
+        },
       );
 
-      results = (searchRes.data?.results || []).map((entry) => {
-        const char      = entry.data;
+      blizzResults = (searchRes.data?.results || []).map((entry) => {
+        const char = entry.data;
         const realmSlug = char.realm?.slug ?? "";
-        const name      = char.name ?? "";
-        const level     = char.level ?? null;
-        const classId   = char.character_class?.id ?? null;
-        const className = char.character_class?.name ?? null;
+        const name = char.name ?? "";
+        const level = char.level ?? null;
+        const classId = char.character_class?.id ?? null;
+        const className =
+          CLASS_NAMES[classId] ?? char.character_class?.name ?? null;
 
-        // Guardar en characterCache para uso futuro
         const ck = `${realmSlug}_${name.toLowerCase()}`;
         if (!characterCache[ck]) {
           characterCache[ck] = {
@@ -579,7 +667,6 @@ app.get("/search", async (req, res) => {
 
         return { name, realm: realmSlug, level, classId, className };
       });
-
     } else {
       const searchRes = await axios.get(
         "https://us.api.blizzard.com/data/wow/search/guild",
@@ -591,15 +678,14 @@ app.get("/search", async (req, res) => {
             orderby: "name",
             _pageSize: 10,
           },
-        }
+        },
       );
 
-      results = (searchRes.data?.results || []).map((entry) => {
-        const guild     = entry.data;
+      blizzResults = (searchRes.data?.results || []).map((entry) => {
+        const guild = entry.data;
         const realmSlug = guild.realm?.slug ?? "";
-        const name      = guild.name ?? "";
+        const name = guild.name ?? "";
 
-        // Guardar en guildCache para uso futuro
         const gk = `${realmSlug}_${name.toLowerCase()}`;
         if (!guildCache[gk]) {
           guildCache[gk] = { name, realm: realmSlug };
@@ -609,31 +695,42 @@ app.get("/search", async (req, res) => {
       });
     }
 
-    searchCache[cacheKey] = { results, cachedAt: Date.now() };
-    res.json({ results });
-
+    searchCache[blizzCacheKey] = {
+      results: blizzResults,
+      cachedAt: Date.now(),
+    };
+    const merged = mergeResults(mode, blizzResults, localResults);
+    res.json({ results: merged });
   } catch (error) {
     console.log("Error en /search:", error.response?.data || error.message);
-
-    // Fallback: buscar en caché local si Blizzard falla
-    const fallback = mode === "character"
-      ? Object.values(characterCache)
-          .filter((e) => e.data?.name?.toLowerCase().includes(q))
-          .map((e) => ({
-            name:      e.data.name,
-            realm:     e.data.realmSlug ?? "",
-            level:     e.data.level ?? null,
-            className: e.data.className ?? null,
-          }))
-          .slice(0, 8)
-      : Object.values(guildCache)
-          .filter((g) => g.name.toLowerCase().includes(q))
-          .map((g) => ({ name: g.name, realm: g.realm }))
-          .slice(0, 8);
-
-    res.json({ results: fallback, fromFallback: true });
+    // Si Blizzard falla, devolver solo los locales
+    res.json({ results: localResults, fromFallback: true });
   }
 });
+
+// Fusiona resultados de Blizzard con los locales, eliminando duplicados.
+// Un duplicado es mismo nombre + mismo realm (case-insensitive).
+// Los de Blizzard tienen prioridad (más datos); los locales que no
+// aparezcan en Blizzard se agregan al final.
+function mergeResults(mode, blizzResults, localResults) {
+  if (mode === "guild") {
+    const seen = new Set(
+      blizzResults.map((r) => `${r.realm}_${r.name.toLowerCase()}`),
+    );
+    const extra = localResults.filter(
+      (r) => !seen.has(`${r.realm}_${r.name.toLowerCase()}`),
+    );
+    return [...blizzResults, ...extra].slice(0, 10);
+  }
+
+  const seen = new Set(
+    blizzResults.map((r) => `${r.realm}_${r.name.toLowerCase()}`),
+  );
+  const extra = localResults.filter(
+    (r) => !seen.has(`${r.realm}_${r.name.toLowerCase()}`),
+  );
+  return [...blizzResults, ...extra].slice(0, 10);
+}
 
 app.get("/character/:realm/:name", async (req, res) => {
   try {
@@ -642,7 +739,6 @@ app.get("/character/:realm/:name", async (req, res) => {
     const cacheKey = `${realm.toLowerCase()}_${name.toLowerCase()}`;
     const cachedCharacter = characterCache[cacheKey];
 
-    // Verificar si el personaje está en caché y sigue siendo válido
     if (
       !forceRefresh &&
       cachedCharacter &&
@@ -655,7 +751,6 @@ app.get("/character/:realm/:name", async (req, res) => {
     console.log(`Consultando API de Blizzard para el personaje: ${cacheKey}`);
     const token = await getAccessToken();
 
-    // 1. datos del personaje
     const characterRes = await axios.get(
       `https://us.api.blizzard.com/profile/wow/character/${realm}/${name}`,
       {
@@ -669,7 +764,6 @@ app.get("/character/:realm/:name", async (req, res) => {
       },
     );
 
-    // 2. media del personaje (imagen)
     const mediaRes = await axios.get(
       `https://us.api.blizzard.com/profile/wow/character/${realm}/${name}/character-media`,
       {
@@ -718,8 +812,10 @@ app.get("/character/:realm/:name", async (req, res) => {
       latestFive.map(async (achievement) => {
         const achievementId = achievement.achievement.id;
 
-        // Verificar si el logro está en el caché local y tiene el ícono cargado
-        if (achievementsLocal[achievementId] && achievementsLocal[achievementId].icon !== undefined) {
+        if (
+          achievementsLocal[achievementId] &&
+          achievementsLocal[achievementId].icon !== undefined
+        ) {
           console.log(`Reutilizando logro en caché local: ${achievementId}`);
           return {
             ...achievementsLocal[achievementId],
@@ -728,7 +824,6 @@ app.get("/character/:realm/:name", async (req, res) => {
         }
 
         console.log(`Solicitando datos del logro a Blizzard: ${achievementId}`);
-        // Datos del logro
         const achievementRes = await axios.get(
           `https://us.api.blizzard.com/data/wow/achievement/${achievementId}`,
           {
@@ -742,7 +837,6 @@ app.get("/character/:realm/:name", async (req, res) => {
           },
         );
 
-        // Media del logro
         const mediaRes = await axios.get(
           `https://us.api.blizzard.com/data/wow/media/achievement/${achievementId}`,
           {
@@ -755,7 +849,6 @@ app.get("/character/:realm/:name", async (req, res) => {
           },
         );
 
-        // Buscar icono
         const icon =
           mediaRes.data.assets.find((asset) => asset.key === "icon")?.value ||
           null;
@@ -768,11 +861,9 @@ app.get("/character/:realm/:name", async (req, res) => {
           icon: icon,
         };
 
-        // Almacenar en memoria
         achievementsLocal[achievementId] = achievementClean;
         needsWrite = true;
 
-        // Retornar logro limpio
         return {
           ...achievementClean,
           completed_timestamp: achievement.completed_timestamp,
@@ -780,15 +871,20 @@ app.get("/character/:realm/:name", async (req, res) => {
       }),
     );
 
-    // Escribir de forma asíncrona si hubo algún logro nuevo
     if (needsWrite) {
-      fs.writeFile(achievementsFilePath, JSON.stringify(achievementsLocal, null, 2), (err) => {
-        if (err) {
-          console.error("Error escribiendo archivo de logros caché:", err);
-        } else {
-          console.log("Archivo de caché local de logros actualizado con éxito.");
-        }
-      });
+      fs.writeFile(
+        achievementsFilePath,
+        JSON.stringify(achievementsLocal, null, 2),
+        (err) => {
+          if (err) {
+            console.error("Error escribiendo archivo de logros caché:", err);
+          } else {
+            console.log(
+              "Archivo de caché local de logros actualizado con éxito.",
+            );
+          }
+        },
+      );
     }
 
     const mediaMap = {};
@@ -799,8 +895,6 @@ app.get("/character/:realm/:name", async (req, res) => {
     const dungeonNameMap = await getMythicDungeonNameMap(token);
     const dungeonIconByName = {};
 
-    // Usar todo el caché local de logros para mapear iconos de calabozos M+.
-    // No solo "achievementsData", porque esa lista trae únicamente los logros más recientes.
     Object.values(achievementsLocal).forEach((achievement) => {
       const dungeonName = extractDungeonNameFromAchievement(achievement.name);
       if (!dungeonName || !achievement.icon) {
@@ -810,10 +904,14 @@ app.get("/character/:realm/:name", async (req, res) => {
       dungeonIconByName[normalizeText(dungeonName)] = achievement.icon;
     });
 
-    const mythicRunsWithAchievementIcons = (mythicPlusData.recentRuns || []).map((run) => {
+    const mythicRunsWithAchievementIcons = (
+      mythicPlusData.recentRuns || []
+    ).map((run) => {
       const normalizedDungeonNameEn = normalizeText(run.dungeon);
       const dungeonMapEntry = dungeonNameMap[normalizedDungeonNameEn];
-      const normalizedDungeonNameEs = normalizeText(dungeonMapEntry?.esName || "");
+      const normalizedDungeonNameEs = normalizeText(
+        dungeonMapEntry?.esName || "",
+      );
       const manualMappedEsName = normalizeText(
         manualDungeonNameMap[normalizedDungeonNameEn] || "",
       );
@@ -825,7 +923,6 @@ app.get("/character/:realm/:name", async (req, res) => {
 
       return {
         ...run,
-        // Usar solo icono derivado de logro (si no hay match, el frontend muestra fallback "+").
         icon: iconFromAchievement || null,
       };
     });
@@ -883,13 +980,11 @@ app.get("/character/:realm/:name", async (req, res) => {
       recentActivity: recentActivity,
     };
 
-    // Guardar en el caché de personajes
     characterCache[cacheKey] = {
       data: response,
       cachedAt: Date.now(),
     };
 
-    // 👇 NO transformamos nada, lo devolvemos crudo
     res.json(response);
   } catch (error) {
     console.log(error.response?.data || error.message);
@@ -973,7 +1068,10 @@ app.post("/cache/warm-guild-achievements/async", async (req, res) => {
         finishedAt: Date.now(),
         lastError: error.response?.data || error.message,
       };
-      console.log("Warm-up async falló:", error.response?.data || error.message);
+      console.log(
+        "Warm-up async falló:",
+        error.response?.data || error.message,
+      );
     }
   })();
 });
